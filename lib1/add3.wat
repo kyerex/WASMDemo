@@ -1,0 +1,11 @@
+(module
+  (import "" "conlog"(func $conlog(param i32 i32)))
+  (memory (;0;) 2)
+  (func $add3  (param $a i32) (result i32)
+      (i32.const 5678)
+      (local.get $a)
+      (call $conlog)
+      (i32.add(local.get $a)(i32.const 3))
+  )
+  (export "add3" (func $add3))
+)

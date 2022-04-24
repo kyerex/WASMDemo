@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>HTML-Terminal</title>
+<script SRC="WSClient.js"></script>
+<script>
+
+var ws; //WSClient also uses this as this is lost on onmessage
+
+function init()
+{
+    ws = new WSClient("ws://127.0.0.1:5555/");
+}
+
+var a=25;
+function rundemo()
+{
+    if (typeof demo_mi !== "undefined") {
+        demo_mi.then (wmi => {
+            console.log("subsequent");
+            const {start} = wmi.instance.exports;
+            console.log(""+a+"+2+3 = "+start(a));
+            a=a+25;
+        })
+        return;
+    }
+    ws.send("Load File:demo.wasm",demo);
+}
+
+var demo_mi;
+var wmem = new WebAssembly.Memory({initial: 32, maximum:160});
+var tbl = new WebAssembly.Table({initial: 0, element: 'anyfunc'});
+var wmbp=new Uint8Array(wmem.buffer);
+
+function demo(w)
+{
+    let x;
+    const view = new DataView(event.data);
+    x=view.getInt32(0);
+    if (x != 6386541) {
+        ws.close(); // not wasm
+        return;
+    }
+    let iobj = { 
+        'env': { 
+          'memoryBase': 0,
+          'tableBase': 0,
+          'memory': wmem,
+          'table': tbl,
+
+          'conlogx': function(x,y){ conlog(x,y); }, 
+        } 
+      };
+
+    demo_mi=WebAssembly.instantiate(w, iobj);
+    demo_mi.then (wmi => {
+        console.log("First");
+        const {start} = wmi.instance.exports;
+        console.log(""+a+"+2+3 = "+start(a));
+        a=a+25;
+    })
+}
+
+function conlog(x,y)
+{
+  console.log("x="+x," y="+y);
+}
+
+</script>
+
+</head>
+
+<body onload="init();">
+    Test Demo:
+    <button onclick="rundemo()">Run Demo</button><br>
+
+</body>
+</html>
