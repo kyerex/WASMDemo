@@ -1,0 +1,42 @@
+I had a hard time to get to this point so I thought I would throw this out there
+I wanted to create archives that contain both clang created and wat2wasm created object 
+and link then together into a single module with wasm-ld. I'm not using any stdlib just compiling with clang. 
+I put together some trival function to demonstrate.
+
+the Makefile in lib1:
+ - clang's add2.c to add2.o
+ - wat2wasm's add3.wat to add3.o
+ - llvm-ar's the 2 objects to lib1.a
+
+the Makefile in debug:
+ - clang's debug.c
+ - llvm-ar's the 1 object to debug.a
+ 
+the Makefile in main:
+ - clang's start.c
+ - wasm-ld' start.o + lib1.a + debug.a creating demo.wasm
+ 
+ start calls add3 - c to wat call
+ add3 call conlog - wat to c call
+ 
+ The hardest problem I had was:
+   (import "" "conlog"(func $conlog(param i32 i32)))
+ in add3.wat
+ I have not seen the 1st "" anywhere in all my searches it was just a guess.
+ 
+ Hopefully you can look at client.html and take what you need to put into your own test environment and
+ not use my test stuff at all.
+ 
+ To use my test you would need:
+ 1. gnu c stuff in you path
+ 2. clang stuff in your path
+ 3. wabt stuff in your path
+ 4. be able to load client.html with chrome
+ 
+ then you could execute the root Makefile which build ./server and
+ executes the other 3 Makefile.
+ then
+ ./server 5555
+ open client.html - show the console and hit the button.
+ 
+ Ken Yerex
